@@ -24,6 +24,8 @@ const Projects = () => {
         // In a real app, we would fetch projects from an API
         // For now, we'll use mock data and filter by current user
         const allProjects = getMockProjects();
+        
+        // Filter projects by current user
         const userProjects = user 
           ? allProjects.filter(p => p.submittedBy === user.id)
           : [];
@@ -31,8 +33,12 @@ const Projects = () => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 800));
         
+        // Log to check what we're getting
+        console.log("All projects:", allProjects);
+        console.log("User ID:", user?.id);
+        console.log("Filtered projects:", userProjects);
+        
         setProjects(userProjects);
-        console.log("Projects loaded:", userProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
         toast({
@@ -47,6 +53,8 @@ const Projects = () => {
 
     if (user) {
       fetchProjects();
+    } else {
+      setIsLoading(false);
     }
   }, [toast, user]);
 

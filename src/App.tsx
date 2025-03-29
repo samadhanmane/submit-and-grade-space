@@ -80,6 +80,12 @@ const App = () => (
                 <Settings />
               </ProtectedRoute>
             } />
+            {/* Add redirect from /profile to /settings */}
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Navigate to="/settings" replace />
+              </ProtectedRoute>
+            } />
             
             {/* Admin routes */}
             <Route path="/admin/dashboard" element={
