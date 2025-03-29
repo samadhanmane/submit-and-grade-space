@@ -14,6 +14,8 @@ import ProjectDetails from "./pages/ProjectDetails";
 import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProjectReview from "./pages/admin/ProjectReview";
+import AdminProjects from "./pages/admin/AdminProjects";
+import AdminUsers from "./pages/admin/AdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -91,6 +93,16 @@ const App = () => (
             <Route path="/admin/dashboard" element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/projects" element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminProjects />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminUsers />
               </ProtectedRoute>
             } />
             <Route path="/admin/project/:id" element={

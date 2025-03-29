@@ -9,7 +9,8 @@ import {
   Tag, 
   Clock,
   FileText,
-  User
+  User,
+  Ban
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import GradingForm from "@/components/admin/GradingForm";
@@ -97,6 +109,35 @@ const ProjectReview = () => {
     }
   };
 
+  const handleRejectProject = async () => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Project rejected",
+        description: "The project has been rejected successfully.",
+      });
+      
+      // Update local state
+      if (project) {
+        setProject({
+          ...project,
+          status: "rejected",
+        });
+      }
+      
+      // Redirect to the admin projects page after a brief delay
+      setTimeout(() => navigate("/admin/projects"), 1500);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Action failed",
+        description: "There was an error rejecting the project. Please try again.",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -134,8 +175,8 @@ const ProjectReview = () => {
               <p className="text-gray-600 mb-6">
                 The project you're looking for doesn't exist.
               </p>
-              <Button onClick={() => navigate("/admin/dashboard")}>
-                Back to Dashboard
+              <Button onClick={() => navigate("/admin/projects")}>
+                Back to Projects
               </Button>
             </div>
           </main>
@@ -156,7 +197,7 @@ const ProjectReview = () => {
                 variant="outline" 
                 size="icon" 
                 className="mr-4"
-                onClick={() => navigate("/admin/dashboard")}
+                onClick={() => navigate("/admin/projects")}
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -177,13 +218,40 @@ const ProjectReview = () => {
                   </Badge>
                 </div>
               </div>
+              {project.status !== "rejected" && project.status !== "graded" && (
+                <div className="ml-auto">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                        <Ban className="mr-2 h-4 w-4" />
+                        Reject Project
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Reject this project?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. The project will be marked as rejected and the student will be notified.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRejectProject}>
+                          Reject
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
             </div>
 
             <Tabs defaultValue="details" className="space-y-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="details">Project Details</TabsTrigger>
-                <TabsTrigger value="grading" disabled={project.status === "graded"}>
-                  {project.status === "graded" ? "Already Graded" : "Grade Project"}
+                <TabsTrigger value="grading" disabled={project.status === "graded" || project.status === "rejected"}>
+                  {project.status === "graded" ? "Already Graded" : 
+                   project.status === "rejected" ? "Project Rejected" : "Grade Project"}
                 </TabsTrigger>
               </TabsList>
               
@@ -345,6 +413,21 @@ const ProjectReview = () => {
                             <div className="bg-gray-50 p-4 rounded">
                               <p className="text-gray-700 whitespace-pre-line">{project.grades.feedback}</p>
                             </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    
+                    {project.status === "rejected" && (
+                      <>
+                        <Separator />
+                        
+                        <div>
+                          <h3 className="text-lg font-medium mb-4 text-red-600">Project Rejected</h3>
+                          <div className="bg-red-50 p-4 rounded border border-red-200">
+                            <p className="text-gray-700">
+                              This project has been rejected. If needed, the student can resubmit an improved version.
+                            </p>
                           </div>
                         </div>
                       </>
