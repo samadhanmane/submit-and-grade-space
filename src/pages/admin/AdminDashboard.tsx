@@ -63,11 +63,11 @@ const AdminDashboard = () => {
       );
     }
     
-    if (categoryFilter) {
+    if (categoryFilter && categoryFilter !== "all-categories") {
       results = results.filter((project) => project.category === categoryFilter);
     }
     
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== "all-statuses") {
       results = results.filter((project) => project.status === statusFilter);
     }
     
@@ -178,7 +178,7 @@ const AdminDashboard = () => {
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Categories</SelectItem>
+                        <SelectItem value="all-categories">All Categories</SelectItem>
                         <SelectItem value="Web Development">Web Development</SelectItem>
                         <SelectItem value="Mobile Development">Mobile Development</SelectItem>
                         <SelectItem value="AI/ML">AI/ML</SelectItem>
@@ -201,7 +201,7 @@ const AdminDashboard = () => {
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Statuses</SelectItem>
+                        <SelectItem value="all-statuses">All Statuses</SelectItem>
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="review">Under Review</SelectItem>
                         <SelectItem value="graded">Graded</SelectItem>
@@ -215,7 +215,8 @@ const AdminDashboard = () => {
 
             <div>
               <h2 className="text-xl font-semibold mb-4">
-                Projects {categoryFilter && `- ${categoryFilter}`} {statusFilter && `- ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`}
+                Projects {categoryFilter && categoryFilter !== "all-categories" ? `- ${categoryFilter}` : ""} 
+                {statusFilter && statusFilter !== "all-statuses" ? `- ${statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}` : ""}
               </h2>
               
               {isLoading ? (
