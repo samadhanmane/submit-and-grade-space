@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProjectCategory } from "@/types";
@@ -10,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, X } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const PROJECT_CATEGORIES: ProjectCategory[] = [
   "Web Development",
@@ -32,6 +32,7 @@ const ProjectSubmissionForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -92,11 +93,25 @@ const ProjectSubmissionForm = () => {
       // For now, we'll just simulate a successful submission
       await new Promise(resolve => setTimeout(resolve, 1500));
       
+      // Create a mock project
+      if (user) {
+        console.log("Submitting project:", {
+          title,
+          description,
+          category,
+          githubLink,
+          submittedBy: user.id,
+          submittedByName: user.name,
+          status: "pending"
+        });
+      }
+      
       toast({
         title: "Project submitted",
         description: "Your project has been submitted successfully.",
       });
       
+      // Navigate to the projects page where the user can see their submitted project
       navigate("/projects");
     } catch (error) {
       toast({

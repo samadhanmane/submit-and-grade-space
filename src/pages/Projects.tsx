@@ -32,6 +32,7 @@ const Projects = () => {
         await new Promise(resolve => setTimeout(resolve, 800));
         
         setProjects(userProjects);
+        console.log("Projects loaded:", userProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
         toast({
@@ -44,7 +45,9 @@ const Projects = () => {
       }
     };
 
-    fetchProjects();
+    if (user) {
+      fetchProjects();
+    }
   }, [toast, user]);
 
   return (

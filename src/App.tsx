@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectSubmission from "./pages/ProjectSubmission";
 import ProjectDetails from "./pages/ProjectDetails";
+import Settings from "./pages/Settings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProjectReview from "./pages/admin/ProjectReview";
 import NotFound from "./pages/NotFound";
@@ -72,6 +73,11 @@ const App = () => (
             <Route path="/project/:id" element={
               <ProtectedRoute>
                 <ProjectDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
               </ProtectedRoute>
             } />
             
