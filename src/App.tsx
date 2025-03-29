@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
 import ProjectSubmission from "./pages/ProjectSubmission";
 import ProjectDetails from "./pages/ProjectDetails";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -56,6 +57,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/projects" element={
+              <ProtectedRoute>
+                <Projects />
               </ProtectedRoute>
             } />
             <Route path="/submit" element={
