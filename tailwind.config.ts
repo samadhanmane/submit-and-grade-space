@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -51,6 +52,25 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				// Custom brand colors
+				brand: {
+					50: '#f0f6ff',
+					100: '#e0edff',
+					200: '#c0daff',
+					300: '#92bdff',
+					400: '#5d94ff',
+					500: '#3366ff', // Main brand color
+					600: '#1e44ff',
+					700: '#152de0',
+					800: '#1a26b6',
+					900: '#1d258f',
+				},
+				status: {
+					pending: '#f59e0b',
+					review: '#3b82f6',
+					graded: '#10b981',
+					rejected: '#ef4444',
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
