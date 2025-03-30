@@ -36,7 +36,7 @@ const Projects = () => {
         // Log to check what we're getting
         console.log("All projects:", allProjects);
         console.log("User ID:", user?.id);
-        console.log("Filtered projects:", userProjects);
+        console.log("Filtered projects for user:", userProjects);
         
         setProjects(userProjects);
       } catch (error) {

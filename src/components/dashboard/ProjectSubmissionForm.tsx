@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProjectCategory } from "@/types";
@@ -10,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { addMockProject } from "@/utils/mockData";
 
 const PROJECT_CATEGORIES: ProjectCategory[] = [
   "Web Development",
@@ -89,21 +91,23 @@ const ProjectSubmissionForm = () => {
     setIsSubmitting(true);
 
     try {
-      // In a real app, we would upload the file and submit the form data to the server
-      // For now, we'll just simulate a successful submission
+      // Simulate a successful submission with a delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Create a mock project
       if (user) {
-        console.log("Submitting project:", {
+        // Create a mock project and add it to our mock data store
+        const newProject = addMockProject({
           title,
           description,
-          category,
+          category: category as ProjectCategory,
           githubLink,
           submittedBy: user.id,
           submittedByName: user.name,
+          zipFile: URL.createObjectURL(file), // This creates a temporary URL for the uploaded file
           status: "pending"
         });
+        
+        console.log("Project submitted:", newProject);
       }
       
       toast({
@@ -114,6 +118,7 @@ const ProjectSubmissionForm = () => {
       // Navigate to the projects page where the user can see their submitted project
       navigate("/projects");
     } catch (error) {
+      console.error("Error submitting project:", error);
       toast({
         variant: "destructive",
         title: "Submission failed",
