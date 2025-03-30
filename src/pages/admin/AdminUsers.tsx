@@ -244,7 +244,7 @@ const AdminUsers = () => {
                               </TableCell>
                               <TableCell>
                                 <Badge
-                                  variant={user.status === "active" ? "success" : "secondary"}
+                                  variant={user.status === "active" ? "secondary" : "outline"}
                                   className={
                                     user.status === "active"
                                       ? "bg-green-100 text-green-800 hover:bg-green-100"
