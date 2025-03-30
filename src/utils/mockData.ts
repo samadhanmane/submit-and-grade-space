@@ -1,4 +1,5 @@
-import { Project } from "@/types";
+
+import { Project, UserProfile } from "@/types";
 
 let mockProjects: Project[] = [
   {
@@ -138,8 +139,53 @@ let mockProjects: Project[] = [
   }
 ];
 
+// Mock user data
+const mockUsers: UserProfile[] = [
+  {
+    id: "user1",
+    name: "John Doe",
+    email: "john@example.com",
+    role: "user",
+  },
+  {
+    id: "user2",
+    name: "Jane Smith",
+    email: "jane@example.com",
+    role: "user",
+  },
+  {
+    id: "user3",
+    name: "Alice Johnson",
+    email: "alice@example.com",
+    role: "user",
+  },
+  {
+    id: "user4",
+    name: "Bob Williams",
+    email: "bob@example.com",
+    role: "user",
+  },
+  {
+    id: "admin1",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "admin",
+  },
+  {
+    id: "admin2",
+    name: "Super Admin",
+    email: "superadmin@example.com",
+    role: "admin",
+  }
+];
+
 export const getMockProjects = (): Project[] => {
   return [...mockProjects];
+};
+
+// Function to get mock users
+export const getMockUsers = (): UserProfile[] => {
+  return [...mockUsers];
 };
 
 // New function to add a project to the mock data
