@@ -1,6 +1,6 @@
 
 // User types
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'user' | 'admin' | 'superadmin';
 
 export interface UserProfile {
   id: string;
@@ -14,6 +14,8 @@ export interface UserProfile {
     linkedin?: string;
     portfolio?: string;
   };
+  // Additional teacher-specific fields
+  createdClasses?: string[]; // Array of class IDs that the teacher created
 }
 
 // Project types
@@ -76,7 +78,7 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string, role?: UserRole) => Promise<void>;
   logout: () => void;
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
 }
@@ -90,4 +92,16 @@ export interface ClassInfo {
   teacherName: string;
   description?: string;
   createdAt: string;
+  students?: string[]; // Array of student IDs enrolled in this class
+}
+
+// Notification types
+export interface Notification {
+  id: string;
+  userId: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  linkTo?: string;
+  type: 'info' | 'success' | 'warning' | 'error';
 }

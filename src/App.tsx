@@ -17,12 +17,13 @@ import ProjectReview from "./pages/admin/ProjectReview";
 import AdminProjects from "./pages/admin/AdminProjects";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminClasses from "./pages/admin/AdminClasses";
+import SuperAdminUsers from "./pages/admin/SuperAdminUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedRoute = ({ children, allowedRoles = ["user", "admin"] }: { 
+// Protected route component with enhanced role checks
+const ProtectedRoute = ({ children, allowedRoles = ["user", "admin", "superadmin"] }: { 
   children: React.ReactNode, 
   allowedRoles?: string[] 
 }) => {
@@ -38,8 +39,14 @@ const ProtectedRoute = ({ children, allowedRoles = ["user", "admin"] }: {
   }
   
   // Check if user has required role
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
+  // Super admin can access all pages
+  if (user.role !== "superadmin" && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+    // Redirect based on role
+    if (user.role === "admin") {
+      return <Navigate to="/admin/dashboard" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
   
   return <>{children}</>;
@@ -59,17 +66,17 @@ const App = () => (
             
             {/* User routes */}
             <Route path="/dashboard" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["user"]}>
                 <Dashboard />
               </ProtectedRoute>
             } />
             <Route path="/projects" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["user"]}>
                 <Projects />
               </ProtectedRoute>
             } />
             <Route path="/submit" element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["user"]}>
                 <ProjectSubmission />
               </ProtectedRoute>
             } />
@@ -92,28 +99,35 @@ const App = () => (
             
             {/* Admin routes */}
             <Route path="/admin/dashboard" element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminDashboard />
               </ProtectedRoute>
             } />
             <Route path="/admin/projects" element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminProjects />
               </ProtectedRoute>
             } />
             <Route path="/admin/users" element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminUsers />
               </ProtectedRoute>
             } />
             <Route path="/admin/classes" element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <AdminClasses />
               </ProtectedRoute>
             } />
             <Route path="/admin/project/:id" element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
                 <ProjectReview />
+              </ProtectedRoute>
+            } />
+            
+            {/* Super Admin routes */}
+            <Route path="/admin/manage-users" element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <SuperAdminUsers />
               </ProtectedRoute>
             } />
             

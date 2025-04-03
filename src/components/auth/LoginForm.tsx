@@ -22,11 +22,28 @@ const LoginForm = () => {
 
     try {
       await login(email, password);
+      
+      // Get the user from localStorage to check role
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        
+        // Redirect based on user role
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "superadmin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        navigate("/dashboard"); // Default redirect
+      }
+      
       toast({
         title: "Login successful",
         description: "You have been logged in successfully.",
       });
-      navigate("/dashboard");
     } catch (error) {
       toast({
         variant: "destructive",

@@ -7,12 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/context/AuthContext";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { UserRole } from "@/types";
 
 const RegisterForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<UserRole>("user");
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -33,12 +36,18 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     try {
-      await register(name, email, password);
+      await register(name, email, password, role);
       toast({
         title: "Registration successful",
         description: "Your account has been created successfully.",
       });
-      navigate("/dashboard");
+      
+      // Redirect based on role
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -104,6 +113,25 @@ const RegisterForm = () => {
               required
             />
           </div>
+          
+          <div className="space-y-2">
+            <Label>Account Type</Label>
+            <RadioGroup 
+              value={role} 
+              onValueChange={(value) => setRole(value as UserRole)}
+              className="flex flex-col space-y-1 mt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="user" id="user" />
+                <Label htmlFor="user" className="cursor-pointer">Student</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="admin" id="admin" />
+                <Label htmlFor="admin" className="cursor-pointer">Teacher</Label>
+              </div>
+            </RadioGroup>
+          </div>
+          
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? "Creating account..." : "Create account"}
           </Button>

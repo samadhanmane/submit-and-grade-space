@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { AuthContextType, UserProfile } from "@/types";
+import { AuthContextType, UserProfile, UserRole } from "@/types";
 import { useToast } from "@/components/ui/use-toast";
 import { getMockUsers } from "@/utils/mockData";
 
@@ -71,6 +71,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(user);
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(user));
+      
+      toast({
+        title: `Welcome back, ${user.name}`,
+        description: `You are logged in as a ${user.role === 'admin' ? 'teacher' : 'student'}.`,
+      });
     } catch (err) {
       console.error("Login error:", err);
       setError(err instanceof Error ? err.message : "Login failed");
@@ -81,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Register function
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, role: UserRole = "user") => {
     setLoading(true);
     setError(null);
 
@@ -103,12 +108,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: `user-${Date.now()}`,
         name,
         email,
-        role: "user",
+        role,
+        enrolledClasses: [],
       };
       
       setUser(newUser);
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(newUser));
+      
+      toast({
+        title: "Account created",
+        description: `You have successfully registered as a ${role === 'admin' ? 'teacher' : 'student'}.`,
+      });
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : "Registration failed");

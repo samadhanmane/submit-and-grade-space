@@ -10,24 +10,31 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  PlusCircle,
+  Key,
+  Home,
+  Bell,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 type SidebarItem = {
   title: string;
   path: string;
   icon: React.ReactNode;
-  role: 'all' | 'user' | 'admin';
+  role: 'all' | 'user' | 'admin' | 'superadmin';
 };
 
 const Sidebar = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -46,6 +53,15 @@ const Sidebar = () => {
   }, []);
 
   const sidebarItems: SidebarItem[] = [
+    // Common items
+    {
+      title: "Home",
+      path: "/",
+      icon: <Home className="w-5 h-5" />,
+      role: 'all',
+    },
+    
+    // Student items
     {
       title: "Dashboard",
       path: "/dashboard",
@@ -65,6 +81,14 @@ const Sidebar = () => {
       role: 'user',
     },
     {
+      title: "Join Class",
+      path: "/dashboard?tab=join",
+      icon: <Key className="w-5 h-5" />,
+      role: 'user',
+    },
+    
+    // Teacher (admin) items
+    {
       title: "Admin Dashboard",
       path: "/admin/dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
@@ -83,10 +107,26 @@ const Sidebar = () => {
       role: 'admin',
     },
     {
+      title: "Create Class",
+      path: "/admin/classes?action=create",
+      icon: <PlusCircle className="w-5 h-5" />,
+      role: 'admin',
+    },
+    
+    // Super admin items (will only be visible to superadmin)
+    {
       title: "Manage Users",
       path: "/admin/users",
       icon: <Users className="w-5 h-5" />,
-      role: 'admin',
+      role: 'superadmin',
+    },
+    
+    // Common items at the bottom
+    {
+      title: "Notifications",
+      path: "/notifications",
+      icon: <Bell className="w-5 h-5" />,
+      role: 'all',
     },
     {
       title: "Settings",
@@ -97,10 +137,29 @@ const Sidebar = () => {
   ];
 
   const filteredItems = sidebarItems.filter(
-    (item) => item.role === 'all' || (user?.role && item.role === user.role)
+    (item) => item.role === 'all' || 
+    (user?.role && item.role === user.role) || 
+    (user?.role === 'superadmin' && (item.role === 'admin' || item.role === 'superadmin'))
   );
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    // Handle special case for dashboard with join tab
+    if (path === "/dashboard?tab=join" && location.pathname === "/dashboard" && location.search.includes("tab=join")) {
+      return true;
+    }
+    
+    // Handle creating a class
+    if (path === "/admin/classes?action=create" && location.pathname === "/admin/classes" && location.search.includes("action=create")) {
+      return true;
+    }
+    
+    return location.pathname === path;
+  };
+  
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <aside
@@ -144,6 +203,20 @@ const Sidebar = () => {
               </Link>
             ))}
           </nav>
+        </div>
+        
+        <div className="p-4 border-t border-gray-200">
+          <Button
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50",
+              collapsed && "justify-center px-2"
+            )}
+            onClick={handleLogout}
+          >
+            <LogOut className="w-5 h-5" />
+            {!collapsed && <span className="ml-3">Log Out</span>}
+          </Button>
         </div>
       </div>
     </aside>

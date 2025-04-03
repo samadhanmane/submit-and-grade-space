@@ -1,331 +1,222 @@
+import { UserProfile, ClassInfo, Project, ProjectCategory, ProjectType } from "@/types";
 
-import { Project, UserProfile, ClassInfo, ProjectType } from "@/types";
-
-let mockProjects: Project[] = [
-  {
-    id: "proj1",
-    title: "AI Chatbot Using NLP",
-    description: "An AI chatbot that uses natural language processing to understand and respond to user queries. Built with Python, TensorFlow, and NLTK.",
-    category: "AI/ML",
-    projectType: "Final Project",
-    submittedBy: "user1",
-    submittedByName: "John Doe",
-    assignedTeacherId: "admin1",
-    assignedTeacherName: "Admin User",
-    classKey: "CLASS123",
-    githubLink: "https://github.com/johndoe/ai-chatbot",
-    zipFile: "https://example.com/files/ai-chatbot.zip",
-    status: "graded",
-    grades: {
-      codeQuality: 9,
-      documentation: 8,
-      innovation: 10,
-      functionality: 8,
-      totalScore: 35,
-      feedback: "Excellent work on the NLP implementation. The model shows good understanding of context in conversation. The documentation could be more detailed regarding the training process. Overall, a very impressive project that demonstrates strong understanding of AI concepts."
-    },
-    reviewedBy: "admin1",
-    createdAt: "2023-09-15T10:30:00Z"
-  },
-  {
-    id: "proj2",
-    title: "E-commerce Platform",
-    description: "A fully functional e-commerce platform with user authentication, product catalog, shopping cart, and checkout process. Built with React, Node.js, and MongoDB.",
-    category: "Web Development",
-    submittedBy: "user2",
-    submittedByName: "Jane Smith",
-    githubLink: "https://github.com/janesmith/ecommerce-platform",
-    zipFile: "https://example.com/files/ecommerce-platform.zip",
-    status: "review",
-    createdAt: "2023-10-01T14:20:00Z"
-  },
-  {
-    id: "proj3",
-    title: "Mobile Task Manager",
-    description: "A mobile task management application that allows users to create, organize, and track their tasks. Built with React Native and Firebase.",
-    category: "Mobile Development",
-    submittedBy: "user1",
-    submittedByName: "John Doe",
-    githubLink: "https://github.com/johndoe/mobile-task-manager",
-    zipFile: "https://example.com/files/mobile-task-manager.zip",
-    status: "pending",
-    createdAt: "2023-10-05T09:15:00Z"
-  },
-  {
-    id: "proj4",
-    title: "Cybersecurity Threat Detection System",
-    description: "A system that detects and prevents cybersecurity threats using machine learning algorithms. Built with Python, Scikit-learn, and Keras.",
-    category: "Cybersecurity",
-    submittedBy: "user3",
-    submittedByName: "Alice Johnson",
-    githubLink: "https://github.com/alicejohnson/cybersecurity-threat-detection",
-    zipFile: "https://example.com/files/cybersecurity-threat-detection.zip",
-    status: "graded",
-    grades: {
-      codeQuality: 7,
-      documentation: 6,
-      innovation: 8,
-      functionality: 9,
-      totalScore: 30,
-      feedback: "The project demonstrates a solid understanding of machine learning techniques applied to cybersecurity. The threat detection model is effective, but the documentation needs improvement. Consider adding more details about the data sources and feature engineering process."
-    },
-    reviewedBy: "admin2",
-    createdAt: "2023-10-10T16:40:00Z"
-  },
-  {
-    id: "proj5",
-    title: "3D Game with Unity",
-    description: "A 3D game developed with Unity, featuring immersive environments and engaging gameplay. Programmed in C#.",
-    category: "Game Development",
-    submittedBy: "user2",
-    submittedByName: "Jane Smith",
-    githubLink: "https://github.com/janesmith/unity-3d-game",
-    zipFile: "https://example.com/files/unity-3d-game.zip",
-    status: "rejected",
-    createdAt: "2023-10-12T11:00:00Z"
-  },
-  {
-    id: "proj6",
-    title: "Data Analysis of Sales Data",
-    description: "Analysis of sales data using Python and Pandas to identify trends and insights. Includes visualizations with Matplotlib and Seaborn.",
-    category: "Data Science",
-    submittedBy: "user3",
-    submittedByName: "Alice Johnson",
-    githubLink: "https://github.com/alicejohnson/sales-data-analysis",
-    zipFile: "https://example.com/files/sales-data-analysis.zip",
-    status: "pending",
-    createdAt: "2023-10-15T13:55:00Z"
-  },
-  {
-    id: "proj7",
-    title: "Cloud Computing Project",
-    description: "A project demonstrating cloud computing concepts using AWS services. Includes deployment and scaling strategies.",
-    category: "Cloud Computing",
-    submittedBy: "user1",
-    submittedByName: "John Doe",
-    githubLink: "https://github.com/johndoe/cloud-computing-project",
-    zipFile: "https://example.com/files/cloud-computing-project.zip",
-    status: "review",
-    createdAt: "2023-10-18T08:25:00Z"
-  },
-  {
-    id: "proj8",
-    title: "IoT Smart Home Automation",
-    description: "An IoT project for smart home automation using Raspberry Pi and various sensors. Controlled via a web interface.",
-    category: "IoT",
-    submittedBy: "user4",
-    submittedByName: "Bob Williams",
-    githubLink: "https://github.com/bobwilliams/iot-smart-home",
-    zipFile: "https://example.com/files/iot-smart-home.zip",
-    status: "graded",
-    grades: {
-      codeQuality: 8,
-      documentation: 7,
-      innovation: 9,
-      functionality: 10,
-      totalScore: 34,
-      feedback: "Excellent IoT project with a well-designed web interface. The sensor integration is seamless, and the automation logic is robust. The documentation is clear and concise. Consider adding more security features to protect against unauthorized access. Overall, a very impressive project that demonstrates strong understanding of IoT concepts."
-    },
-    reviewedBy: "admin1",
-    createdAt: "2023-10-20T17:10:00Z"
-  },
-  {
-    id: "proj9",
-    title: "Other Project Example",
-    description: "An example project that falls into the 'Other' category. This could be anything that doesn't fit into the other categories.",
-    category: "Other",
-    submittedBy: "user4",
-    submittedByName: "Bob Williams",
-    githubLink: "https://github.com/bobwilliams/other-project",
-    zipFile: "https://example.com/files/other-project.zip",
-    status: "pending",
-    createdAt: "2023-10-22T12:30:00Z"
-  }
+// Mock project categories and types
+export const PROJECT_CATEGORIES: ProjectCategory[] = [
+  "Web Development",
+  "Mobile Development",
+  "AI/ML",
+  "Cybersecurity",
+  "Game Development",
+  "Data Science",
+  "Cloud Computing",
+  "IoT",
+  "Other",
 ];
 
-// Mock user data
-const mockUsers: UserProfile[] = [
-  {
-    id: "user1",
-    name: "John Doe",
-    email: "john@example.com",
-    role: "user",
-    enrolledClasses: ["class1", "class3"],
-  },
-  {
-    id: "user2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    role: "user",
-    enrolledClasses: ["class2"],
-  },
-  {
-    id: "user3",
-    name: "Alice Johnson",
-    email: "alice@example.com",
-    role: "user",
-    enrolledClasses: [],
-  },
-  {
-    id: "user4",
-    name: "Bob Williams",
-    email: "bob@example.com",
-    role: "user",
-    enrolledClasses: [],
-  },
-  {
-    id: "admin1",
-    name: "Admin User",
-    email: "admin@example.com",
-    role: "admin",
-  },
-  {
-    id: "admin2",
-    name: "Super Admin",
-    email: "superadmin@example.com",
-    role: "admin",
-  }
-];
-
-// Mock class data
-const mockClasses: ClassInfo[] = [
-  {
-    id: "class1",
-    name: "Web Development 101",
-    key: "WEB101",
-    teacherId: "admin1",
-    teacherName: "Admin User",
-    description: "Introduction to web development with HTML, CSS, and JavaScript",
-    createdAt: "2023-08-01T09:00:00Z"
-  },
-  {
-    id: "class2",
-    name: "Advanced Machine Learning",
-    key: "ML202",
-    teacherId: "admin1",
-    teacherName: "Admin User",
-    description: "Advanced concepts in machine learning and deep neural networks",
-    createdAt: "2023-08-15T14:30:00Z"
-  },
-  {
-    id: "class3",
-    name: "Mobile App Development",
-    key: "MOB303",
-    teacherId: "admin2",
-    teacherName: "Super Admin",
-    description: "Creating mobile applications for iOS and Android platforms",
-    createdAt: "2023-09-01T11:15:00Z"
-  }
-];
-
-// Project types
 export const PROJECT_TYPES: ProjectType[] = [
   "Assignment",
   "Final Project",
   "Research",
   "Personal Project",
-  "Other"
+  "Other",
 ];
 
-export const getMockProjects = (): Project[] => {
-  return [...mockProjects];
-};
-
-// Function to get mock users
+// Mock users (replace with API calls in a real app)
 export const getMockUsers = (): UserProfile[] => {
-  return [...mockUsers];
+  // Check if we have stored users
+  const storedUsers = localStorage.getItem('mockUsers');
+  if (storedUsers) {
+    return JSON.parse(storedUsers);
+  }
+
+  // Initial set of users
+  const users: UserProfile[] = [
+    {
+      id: 'user-1',
+      name: 'John Student',
+      email: 'student@example.com',
+      role: 'user',
+      enrolledClasses: ['class-1', 'class-2'],
+      profileImage: 'https://i.pravatar.cc/150?u=user-1',
+    },
+    {
+      id: 'user-2',
+      name: 'Jane Teacher',
+      email: 'teacher@example.com',
+      role: 'admin',
+      profileImage: 'https://i.pravatar.cc/150?u=user-2',
+      createdClasses: ['class-1']
+    },
+    {
+      id: 'user-3',
+      name: 'Admin User',
+      email: 'admin@example.com',
+      role: 'superadmin',
+      profileImage: 'https://i.pravatar.cc/150?u=user-3',
+    },
+    {
+      id: 'user-4',
+      name: 'Sarah Student',
+      email: 'sarah@example.com',
+      role: 'user',
+      enrolledClasses: ['class-1'],
+      profileImage: 'https://i.pravatar.cc/150?u=user-4',
+    },
+    {
+      id: 'user-5',
+      name: 'Mike Professor',
+      email: 'mike@example.com',
+      role: 'admin',
+      profileImage: 'https://i.pravatar.cc/150?u=user-5',
+      createdClasses: ['class-2', 'class-3']
+    }
+  ];
+
+  // Store the users
+  localStorage.setItem('mockUsers', JSON.stringify(users));
+  
+  return users;
 };
 
-// Function to get teachers only
 export const getMockTeachers = (): UserProfile[] => {
-  return [...mockUsers].filter(user => user.role === "admin");
+  const users = getMockUsers();
+  return users.filter(user => user.role === 'admin');
 };
 
-// Function to get mock classes
-export const getMockClasses = (): ClassInfo[] => {
-  return [...mockClasses];
-};
+// Mock classes (replace with API calls in a real app)
+let mockClasses: ClassInfo[] = [
+  {
+    id: 'class-1',
+    name: 'Web Development 101',
+    key: 'WD101-A2Z9',
+    teacherId: 'user-2',
+    teacherName: 'Jane Teacher',
+    description: 'Introduction to web development with HTML, CSS, and JavaScript.',
+    createdAt: new Date().toISOString(),
+    students: ['user-1', 'user-4'],
+  },
+  {
+    id: 'class-2',
+    name: 'Mobile App Development',
+    key: 'MAD201-B8XY',
+    teacherId: 'user-5',
+    teacherName: 'Mike Professor',
+    description: 'Learn to build native mobile apps for iOS and Android.',
+    createdAt: new Date().toISOString(),
+    students: ['user-1'],
+  },
+  {
+    id: 'class-3',
+    name: 'Data Science Fundamentals',
+    key: 'DSF301-C6UV',
+    teacherId: 'user-5',
+    teacherName: 'Mike Professor',
+    description: 'Explore the basics of data science with Python.',
+    createdAt: new Date().toISOString(),
+  },
+];
 
-// Function to get classes by teacher ID
+export const getMockClasses = (): ClassInfo[] => mockClasses;
+
 export const getClassesByTeacher = (teacherId: string): ClassInfo[] => {
-  return [...mockClasses].filter(cls => cls.teacherId === teacherId);
+  return mockClasses.filter(cls => cls.teacherId === teacherId);
 };
 
-// Function to get classes joined by a student
 export const getClassesByStudent = (studentId: string): ClassInfo[] => {
-  const student = mockUsers.find(user => user.id === studentId);
-  if (!student || !student.enrolledClasses) {
-    return [];
-  }
-  return [...mockClasses].filter(cls => student.enrolledClasses?.includes(cls.id));
+  return mockClasses.filter(cls => cls.students?.includes(studentId));
 };
 
-// Function to generate a random class key (6 alphanumeric characters)
-export const generateClassKey = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
-
-// Find a class by key
-export const findClassByKey = (key: string): ClassInfo | undefined => {
-  return mockClasses.find(cls => cls.key === key);
-};
-
-// Join a class using a key
-export const joinClassByKey = (userId: string, classKey: string): boolean => {
-  const classInfo = mockClasses.find(cls => cls.key === classKey);
-  if (!classInfo) {
-    return false;
-  }
-  
-  const userIndex = mockUsers.findIndex(user => user.id === userId);
-  if (userIndex === -1) {
-    return false;
-  }
-  
-  // Initialize enrolledClasses array if it doesn't exist
-  if (!mockUsers[userIndex].enrolledClasses) {
-    mockUsers[userIndex].enrolledClasses = [];
-  }
-  
-  // Check if user is already enrolled
-  if (mockUsers[userIndex].enrolledClasses?.includes(classInfo.id)) {
-    return true; // Already enrolled
-  }
-  
-  // Add class to user's enrolled classes
-  mockUsers[userIndex].enrolledClasses?.push(classInfo.id);
-  return true;
-};
-
-// New function to add a project to the mock data
-export const addMockProject = (project: Omit<Project, "id" | "createdAt">): Project => {
-  const newProject: Project = {
-    ...project,
-    id: `proj${mockProjects.length + 1}`,
-    createdAt: new Date().toISOString()
+export const addMockClass = (newClassInfo: Omit<ClassInfo, 'id' | 'key' | 'createdAt'>): ClassInfo => {
+  const newClass: ClassInfo = {
+    id: `class-${Date.now()}`,
+    key: generateClassKey(),
+    createdAt: new Date().toISOString(),
+    ...newClassInfo,
   };
-  
-  mockProjects.push(newProject);
-  console.log("Project added to mock data:", newProject);
-  console.log("Updated projects list:", mockProjects);
-  
+  mockClasses = [...mockClasses, newClass];
+  return newClass;
+};
+
+// Mock projects (replace with API calls in a real app)
+let mockProjects: Project[] = [
+  {
+    id: 'project-1',
+    title: 'Personal Website',
+    description: 'A personal website built with React.',
+    category: 'Web Development',
+    projectType: 'Personal Project',
+    submittedBy: 'user-1',
+    submittedByName: 'John Student',
+    assignedTeacherId: 'user-2',
+    assignedTeacherName: 'Jane Teacher',
+    classKey: 'WD101-A2Z9',
+    githubLink: 'https://github.com/john-student/personal-website',
+    status: 'graded',
+    grades: {
+      codeQuality: 85,
+      documentation: 90,
+      innovation: 75,
+      functionality: 95,
+      totalScore: 86.25,
+      feedback: 'Great job on the website! The design is clean and the code is well-organized.',
+    },
+    reviewedBy: 'user-2',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'project-2',
+    title: 'Mobile App for Task Management',
+    description: 'A mobile app for managing tasks built with React Native.',
+    category: 'Mobile Development',
+    projectType: 'Final Project',
+    submittedBy: 'user-1',
+    submittedByName: 'John Student',
+    assignedTeacherId: 'user-5',
+    assignedTeacherName: 'Mike Professor',
+    classKey: 'MAD201-B8XY',
+    githubLink: 'https://github.com/john-student/task-management-app',
+    status: 'review',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'project-3',
+    title: 'AI-Powered Chatbot',
+    description: 'An AI-powered chatbot built with Python and TensorFlow.',
+    category: 'AI/ML',
+    projectType: 'Research',
+    submittedBy: 'user-4',
+    submittedByName: 'Sarah Student',
+    assignedTeacherId: 'user-2',
+    assignedTeacherName: 'Jane Teacher',
+    classKey: 'WD101-A2Z9',
+    githubLink: 'https://github.com/sarah-student/ai-chatbot',
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export const getMockProjects = (): Project[] => mockProjects;
+
+export const getProjectById = (id: string): Project | undefined => {
+  return mockProjects.find(project => project.id === id);
+};
+
+export const addMockProject = (newProjectInfo: Omit<Project, 'id' | 'createdAt'>): Project => {
+  const newProject: Project = {
+    id: `project-${Date.now()}`,
+    createdAt: new Date().toISOString(),
+    ...newProjectInfo,
+  };
+  mockProjects = [...mockProjects, newProject];
   return newProject;
 };
 
-// Function to add a new class
-export const addMockClass = (classInfo: Omit<ClassInfo, "id" | "createdAt" | "key">): ClassInfo => {
-  const newClass: ClassInfo = {
-    ...classInfo,
-    id: `class${mockClasses.length + 1}`,
-    key: generateClassKey(),
-    createdAt: new Date().toISOString()
-  };
-  
-  mockClasses.push(newClass);
-  return newClass;
+// Helper function to generate a random class key
+const generateClassKey = (): string => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let key = '';
+  for (let i = 0; i < 8; i++) {
+    key += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return key;
 };
