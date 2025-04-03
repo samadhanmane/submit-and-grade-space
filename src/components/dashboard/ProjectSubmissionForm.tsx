@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProjectCategory, ProjectType, UserProfile, ClassInfo } from "@/types";
@@ -11,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, X, BookOpen, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { addMockProject, getMockTeachers, getMockClasses, PROJECT_TYPES } from "@/utils/mockData";
+import { addMockProject, getMockTeachers, getMockClasses, PROJECT_TYPES, getClassesByStudent } from "@/utils/mockData";
 
 const PROJECT_CATEGORIES: ProjectCategory[] = [
   "Web Development",
@@ -36,6 +35,7 @@ const ProjectSubmissionForm = () => {
   const [teachers, setTeachers] = useState<UserProfile[]>([]);
   const [selectedTeacher, setSelectedTeacher] = useState("");
   const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [enrolledClasses, setEnrolledClasses] = useState<ClassInfo[]>([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [githubError, setGithubError] = useState("");
   
@@ -52,13 +52,18 @@ const ProjectSubmissionForm = () => {
         
         setTeachers(teacherData);
         setClasses(classData);
+        
+        if (user) {
+          const userClasses = getClassesByStudent(user.id);
+          setEnrolledClasses(userClasses);
+        }
       } catch (error) {
         console.error("Error fetching teachers and classes:", error);
       }
     };
     
     fetchTeachersAndClasses();
-  }, []);
+  }, [user]);
 
   const validateGithubUrl = (url: string) => {
     if (!url) return true; // Empty is ok (optional field)
@@ -226,68 +231,90 @@ const ProjectSubmissionForm = () => {
           Upload your project files and provide details for evaluation
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+    
+    <CardContent>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="title">Project Title*</Label>
+          <Input
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter a descriptive title for your project"
+            required
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Project Title*</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter a descriptive title for your project"
-              required
-            />
+            <Label htmlFor="category">Category*</Label>
+            <Select value={category} onValueChange={(value) => setCategory(value as ProjectCategory)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {PROJECT_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>
+                    {cat}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="projectType">Project Type*</Label>
+            <Select value={projectType} onValueChange={(value) => setProjectType(value as ProjectType)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select project type" />
+              </SelectTrigger>
+              <SelectContent>
+                {PROJECT_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="description">Description*</Label>
+          <Textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe your project, its goals, features, and technologies used"
+            rows={4}
+            required
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {enrolledClasses.length > 0 ? (
             <div className="space-y-2">
-              <Label htmlFor="category">Category*</Label>
-              <Select value={category} onValueChange={(value) => setCategory(value as ProjectCategory)}>
+              <Label htmlFor="enrolledClass">Submit to One of Your Classes</Label>
+              <Select value={selectedClass} onValueChange={(value) => {
+                setSelectedClass(value);
+                if (value) setSelectedTeacher(""); // Clear teacher selection if class is selected
+              }}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
+                  <SelectValue placeholder="Choose a class" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PROJECT_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
+                  <SelectItem value="">None</SelectItem>
+                  {enrolledClasses.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name} - Teacher: {cls.teacherName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            
+          ) : (
             <div className="space-y-2">
-              <Label htmlFor="projectType">Project Type*</Label>
-              <Select value={projectType} onValueChange={(value) => setProjectType(value as ProjectType)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select project type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROJECT_TYPES.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description*</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Describe your project, its goals, features, and technologies used"
-              rows={4}
-              required
-            />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="teacher">Select Teacher (Optional)</Label>
+              <Label htmlFor="teacher">Select Teacher*</Label>
               <Select value={selectedTeacher} onValueChange={(value) => {
                 setSelectedTeacher(value);
                 if (value) setSelectedClass(""); // Clear class selection if teacher is selected
@@ -305,9 +332,35 @@ const ProjectSubmissionForm = () => {
                 </SelectContent>
               </Select>
             </div>
-            
+          )}
+          
+          {enrolledClasses.length > 0 ? (
             <div className="space-y-2">
-              <Label htmlFor="class">Select Class (Optional)</Label>
+              <Label htmlFor="teacher">Or Select a Different Teacher</Label>
+              <Select value={selectedTeacher} onValueChange={(value) => {
+                setSelectedTeacher(value);
+                if (value) setSelectedClass(""); // Clear class selection if teacher is selected
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a teacher" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {teachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground flex items-center mt-1">
+                <BookOpen className="h-3 w-3 mr-1" />
+                Select either a class or a teacher
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="class">Or Select Class (If you have a key)</Label>
               <Select value={selectedClass} onValueChange={(value) => {
                 setSelectedClass(value);
                 if (value) setSelectedTeacher(""); // Clear teacher selection if class is selected
@@ -324,96 +377,95 @@ const ProjectSubmissionForm = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground flex items-center mt-1">
-                <BookOpen className="h-3 w-3 mr-1" />
-                Either select a teacher or a class for your submission
-              </p>
             </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="githubLink">GitHub Repository Link</Label>
-            <Input
-              id="githubLink"
-              type="url"
-              value={githubLink}
-              onChange={handleGithubLinkChange}
-              placeholder="https://github.com/yourusername/yourproject"
-              className={githubError ? "border-red-500" : ""}
-            />
-            {githubError && (
-              <p className="text-sm text-red-500 flex items-center mt-1">
-                <AlertCircle className="h-3 w-3 mr-1" />
-                {githubError}
-              </p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="projectFile">Project ZIP File</Label>
-            {!file ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center">
-                <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-600 mb-2">
-                  Drag and drop your ZIP file here, or click to browse
-                </p>
-                <p className="text-xs text-gray-500 mb-2">
-                  Max file size: 50MB
-                </p>
-                <Input
-                  id="projectFile"
-                  type="file"
-                  accept=".zip"
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById("projectFile")?.click()}
-                >
-                  Browse Files
-                </Button>
-              </div>
-            ) : (
-              <div className="border border-gray-300 rounded-lg p-4 flex justify-between items-center">
-                <div className="flex items-center">
-                  <div className="bg-gray-100 p-2 rounded mr-3">
-                    <Upload className="h-5 w-5 text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">{file.name}</p>
-                    <p className="text-xs text-gray-500">
-                      {(file.size / (1024 * 1024)).toFixed(2)} MB
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={clearFile}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-            )}
-            <p className="text-sm text-muted-foreground flex items-center mt-1">
+          )}
+        </div>
+        
+        
+        <div className="space-y-2">
+          <Label htmlFor="githubLink">GitHub Repository Link</Label>
+          <Input
+            id="githubLink"
+            type="url"
+            value={githubLink}
+            onChange={handleGithubLinkChange}
+            placeholder="https://github.com/yourusername/yourproject"
+            className={githubError ? "border-red-500" : ""}
+          />
+          {githubError && (
+            <p className="text-sm text-red-500 flex items-center mt-1">
               <AlertCircle className="h-3 w-3 mr-1" />
-              Either a GitHub link or a ZIP file is required
+              {githubError}
             </p>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-end gap-2 border-t p-6">
-        <Button variant="outline" onClick={() => navigate("/projects")}>
-          Cancel
-        </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Submit Project"}
-        </Button>
-      </CardFooter>
-    </Card>
+          )}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="projectFile">Project ZIP File</Label>
+          {!file ? (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center">
+              <Upload className="h-10 w-10 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-600 mb-2">
+                Drag and drop your ZIP file here, or click to browse
+              </p>
+              <p className="text-xs text-gray-500 mb-2">
+                Max file size: 50MB
+              </p>
+              <Input
+                id="projectFile"
+                type="file"
+                accept=".zip"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById("projectFile")?.click()}
+              >
+                Browse Files
+              </Button>
+            </div>
+          ) : (
+            <div className="border border-gray-300 rounded-lg p-4 flex justify-between items-center">
+              <div className="flex items-center">
+                <div className="bg-gray-100 p-2 rounded mr-3">
+                  <Upload className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{file.name}</p>
+                  <p className="text-xs text-gray-500">
+                    {(file.size / (1024 * 1024)).toFixed(2)} MB
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={clearFile}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
+          <p className="text-sm text-muted-foreground flex items-center mt-1">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            Either a GitHub link or a ZIP file is required
+          </p>
+        </div>
+      </form>
+    </CardContent>
+    
+    <CardFooter className="flex justify-end gap-2 border-t p-6">
+      <Button variant="outline" onClick={() => navigate("/projects")}>
+        Cancel
+      </Button>
+      <Button onClick={handleSubmit} disabled={isSubmitting}>
+        {isSubmitting ? "Submitting..." : "Submit Project"}
+      </Button>
+    </CardFooter>
+  </Card>
   );
 };
 

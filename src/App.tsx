@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProjectReview from "./pages/admin/ProjectReview";
 import AdminProjects from "./pages/admin/AdminProjects";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminClasses from "./pages/admin/AdminClasses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -103,6 +104,11 @@ const App = () => (
             <Route path="/admin/users" element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminUsers />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/classes" element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AdminClasses />
               </ProtectedRoute>
             } />
             <Route path="/admin/project/:id" element={

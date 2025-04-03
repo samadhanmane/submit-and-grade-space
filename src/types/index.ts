@@ -8,6 +8,7 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   profileImage?: string;
+  enrolledClasses?: string[]; // Array of class IDs that the user has joined
   links?: {
     github?: string;
     linkedin?: string;

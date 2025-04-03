@@ -9,7 +9,8 @@ import {
   Settings, 
   Users,
   ChevronLeft,
-  ChevronRight 
+  ChevronRight,
+  BookOpen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -73,6 +74,12 @@ const Sidebar = () => {
       title: "Review Projects",
       path: "/admin/projects",
       icon: <FileCheck className="w-5 h-5" />,
+      role: 'admin',
+    },
+    {
+      title: "Manage Classes",
+      path: "/admin/classes",
+      icon: <BookOpen className="w-5 h-5" />,
       role: 'admin',
     },
     {

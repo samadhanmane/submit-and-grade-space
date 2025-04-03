@@ -150,24 +150,28 @@ const mockUsers: UserProfile[] = [
     name: "John Doe",
     email: "john@example.com",
     role: "user",
+    enrolledClasses: ["class1", "class3"],
   },
   {
     id: "user2",
     name: "Jane Smith",
     email: "jane@example.com",
     role: "user",
+    enrolledClasses: ["class2"],
   },
   {
     id: "user3",
     name: "Alice Johnson",
     email: "alice@example.com",
     role: "user",
+    enrolledClasses: [],
   },
   {
     id: "user4",
     name: "Bob Williams",
     email: "bob@example.com",
     role: "user",
+    enrolledClasses: [],
   },
   {
     id: "admin1",
@@ -247,6 +251,15 @@ export const getClassesByTeacher = (teacherId: string): ClassInfo[] => {
   return [...mockClasses].filter(cls => cls.teacherId === teacherId);
 };
 
+// Function to get classes joined by a student
+export const getClassesByStudent = (studentId: string): ClassInfo[] => {
+  const student = mockUsers.find(user => user.id === studentId);
+  if (!student || !student.enrolledClasses) {
+    return [];
+  }
+  return [...mockClasses].filter(cls => student.enrolledClasses?.includes(cls.id));
+};
+
 // Function to generate a random class key (6 alphanumeric characters)
 export const generateClassKey = (): string => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -255,6 +268,38 @@ export const generateClassKey = (): string => {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
+};
+
+// Find a class by key
+export const findClassByKey = (key: string): ClassInfo | undefined => {
+  return mockClasses.find(cls => cls.key === key);
+};
+
+// Join a class using a key
+export const joinClassByKey = (userId: string, classKey: string): boolean => {
+  const classInfo = mockClasses.find(cls => cls.key === classKey);
+  if (!classInfo) {
+    return false;
+  }
+  
+  const userIndex = mockUsers.findIndex(user => user.id === userId);
+  if (userIndex === -1) {
+    return false;
+  }
+  
+  // Initialize enrolledClasses array if it doesn't exist
+  if (!mockUsers[userIndex].enrolledClasses) {
+    mockUsers[userIndex].enrolledClasses = [];
+  }
+  
+  // Check if user is already enrolled
+  if (mockUsers[userIndex].enrolledClasses?.includes(classInfo.id)) {
+    return true; // Already enrolled
+  }
+  
+  // Add class to user's enrolled classes
+  mockUsers[userIndex].enrolledClasses?.push(classInfo.id);
+  return true;
 };
 
 // New function to add a project to the mock data
