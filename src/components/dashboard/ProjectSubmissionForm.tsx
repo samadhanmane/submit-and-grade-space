@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ProjectCategory } from "@/types";
+import { ProjectCategory, ProjectType, UserProfile, ClassInfo } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,9 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, X } from "lucide-react";
+import { Upload, X, BookOpen, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { addMockProject } from "@/utils/mockData";
+import { addMockProject, getMockTeachers, getMockClasses, PROJECT_TYPES } from "@/utils/mockData";
 
 const PROJECT_CATEGORIES: ProjectCategory[] = [
   "Web Development",
@@ -29,12 +29,55 @@ const ProjectSubmissionForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<ProjectCategory | "">("");
+  const [projectType, setProjectType] = useState<ProjectType | "">("");
   const [githubLink, setGithubLink] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [teachers, setTeachers] = useState<UserProfile[]>([]);
+  const [selectedTeacher, setSelectedTeacher] = useState("");
+  const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [githubError, setGithubError] = useState("");
+  
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+
+  useEffect(() => {
+    // Fetch teachers and classes
+    const fetchTeachersAndClasses = async () => {
+      try {
+        const teacherData = getMockTeachers();
+        const classData = getMockClasses();
+        
+        setTeachers(teacherData);
+        setClasses(classData);
+      } catch (error) {
+        console.error("Error fetching teachers and classes:", error);
+      }
+    };
+    
+    fetchTeachersAndClasses();
+  }, []);
+
+  const validateGithubUrl = (url: string) => {
+    if (!url) return true; // Empty is ok (optional field)
+    
+    // Basic GitHub URL validation
+    const githubUrlPattern = /^https:\/\/github\.com\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+\/?$/;
+    return githubUrlPattern.test(url);
+  };
+
+  const handleGithubLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setGithubLink(url);
+    
+    if (url && !validateGithubUrl(url)) {
+      setGithubError("Please enter a valid GitHub repository URL (e.g., https://github.com/username/repo)");
+    } else {
+      setGithubError("");
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -70,7 +113,8 @@ const ProjectSubmissionForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !description || !category) {
+    // Validate required fields
+    if (!title || !description || !category || !projectType) {
       toast({
         variant: "destructive",
         title: "Missing fields",
@@ -79,11 +123,32 @@ const ProjectSubmissionForm = () => {
       return;
     }
     
-    if (!file) {
+    // Validate file or GitHub link
+    if (!file && !githubLink) {
       toast({
         variant: "destructive",
-        title: "No file uploaded",
-        description: "Please upload a ZIP file of your project.",
+        title: "Missing project files",
+        description: "Please either upload a ZIP file or provide a GitHub repository link.",
+      });
+      return;
+    }
+    
+    // Validate GitHub URL if provided
+    if (githubLink && !validateGithubUrl(githubLink)) {
+      toast({
+        variant: "destructive",
+        title: "Invalid GitHub URL",
+        description: "Please provide a valid GitHub repository URL.",
+      });
+      return;
+    }
+    
+    // Validate teacher or class selection
+    if (!selectedTeacher && !selectedClass) {
+      toast({
+        variant: "destructive",
+        title: "Missing teacher or class",
+        description: "Please select either a teacher or a class for your project submission.",
       });
       return;
     }
@@ -95,15 +160,39 @@ const ProjectSubmissionForm = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       if (user) {
+        // Get teacher info based on selection
+        let teacherId = "";
+        let teacherName = "";
+        let classKey = "";
+        
+        if (selectedClass) {
+          const selectedClassInfo = classes.find(cls => cls.id === selectedClass);
+          if (selectedClassInfo) {
+            teacherId = selectedClassInfo.teacherId;
+            teacherName = selectedClassInfo.teacherName;
+            classKey = selectedClassInfo.key;
+          }
+        } else if (selectedTeacher) {
+          const selectedTeacherInfo = teachers.find(teacher => teacher.id === selectedTeacher);
+          if (selectedTeacherInfo) {
+            teacherId = selectedTeacherInfo.id;
+            teacherName = selectedTeacherInfo.name;
+          }
+        }
+        
         // Create a mock project and add it to our mock data store
         const newProject = addMockProject({
           title,
           description,
           category: category as ProjectCategory,
+          projectType: projectType as ProjectType,
           githubLink,
           submittedBy: user.id,
           submittedByName: user.name,
-          zipFile: URL.createObjectURL(file), // This creates a temporary URL for the uploaded file
+          assignedTeacherId: teacherId,
+          assignedTeacherName: teacherName,
+          classKey,
+          zipFile: file ? URL.createObjectURL(file) : undefined, // This creates a temporary URL for the uploaded file
           status: "pending"
         });
         
@@ -150,20 +239,38 @@ const ProjectSubmissionForm = () => {
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="category">Category*</Label>
-            <Select value={category} onValueChange={(value) => setCategory(value as ProjectCategory)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {PROJECT_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="category">Category*</Label>
+              <Select value={category} onValueChange={(value) => setCategory(value as ProjectCategory)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROJECT_CATEGORIES.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="projectType">Project Type*</Label>
+              <Select value={projectType} onValueChange={(value) => setProjectType(value as ProjectType)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select project type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PROJECT_TYPES.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="space-y-2">
@@ -178,19 +285,72 @@ const ProjectSubmissionForm = () => {
             />
           </div>
           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="teacher">Select Teacher (Optional)</Label>
+              <Select value={selectedTeacher} onValueChange={(value) => {
+                setSelectedTeacher(value);
+                if (value) setSelectedClass(""); // Clear class selection if teacher is selected
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a teacher" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {teachers.map((teacher) => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="class">Select Class (Optional)</Label>
+              <Select value={selectedClass} onValueChange={(value) => {
+                setSelectedClass(value);
+                if (value) setSelectedTeacher(""); // Clear teacher selection if class is selected
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a class" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {classes.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name} ({cls.key})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-muted-foreground flex items-center mt-1">
+                <BookOpen className="h-3 w-3 mr-1" />
+                Either select a teacher or a class for your submission
+              </p>
+            </div>
+          </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="githubLink">GitHub Repository Link (Optional)</Label>
+            <Label htmlFor="githubLink">GitHub Repository Link</Label>
             <Input
               id="githubLink"
               type="url"
               value={githubLink}
-              onChange={(e) => setGithubLink(e.target.value)}
+              onChange={handleGithubLinkChange}
               placeholder="https://github.com/yourusername/yourproject"
+              className={githubError ? "border-red-500" : ""}
             />
+            {githubError && (
+              <p className="text-sm text-red-500 flex items-center mt-1">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                {githubError}
+              </p>
+            )}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="projectFile">Project ZIP File*</Label>
+            <Label htmlFor="projectFile">Project ZIP File</Label>
             {!file ? (
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center">
                 <Upload className="h-10 w-10 text-gray-400 mb-2" />
@@ -238,6 +398,10 @@ const ProjectSubmissionForm = () => {
                 </Button>
               </div>
             )}
+            <p className="text-sm text-muted-foreground flex items-center mt-1">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              Either a GitHub link or a ZIP file is required
+            </p>
           </div>
         </form>
       </CardContent>

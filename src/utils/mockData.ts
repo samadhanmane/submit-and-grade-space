@@ -1,5 +1,5 @@
 
-import { Project, UserProfile } from "@/types";
+import { Project, UserProfile, ClassInfo, ProjectType } from "@/types";
 
 let mockProjects: Project[] = [
   {
@@ -7,8 +7,12 @@ let mockProjects: Project[] = [
     title: "AI Chatbot Using NLP",
     description: "An AI chatbot that uses natural language processing to understand and respond to user queries. Built with Python, TensorFlow, and NLTK.",
     category: "AI/ML",
+    projectType: "Final Project",
     submittedBy: "user1",
     submittedByName: "John Doe",
+    assignedTeacherId: "admin1",
+    assignedTeacherName: "Admin User",
+    classKey: "CLASS123",
     githubLink: "https://github.com/johndoe/ai-chatbot",
     zipFile: "https://example.com/files/ai-chatbot.zip",
     status: "graded",
@@ -179,6 +183,46 @@ const mockUsers: UserProfile[] = [
   }
 ];
 
+// Mock class data
+const mockClasses: ClassInfo[] = [
+  {
+    id: "class1",
+    name: "Web Development 101",
+    key: "WEB101",
+    teacherId: "admin1",
+    teacherName: "Admin User",
+    description: "Introduction to web development with HTML, CSS, and JavaScript",
+    createdAt: "2023-08-01T09:00:00Z"
+  },
+  {
+    id: "class2",
+    name: "Advanced Machine Learning",
+    key: "ML202",
+    teacherId: "admin1",
+    teacherName: "Admin User",
+    description: "Advanced concepts in machine learning and deep neural networks",
+    createdAt: "2023-08-15T14:30:00Z"
+  },
+  {
+    id: "class3",
+    name: "Mobile App Development",
+    key: "MOB303",
+    teacherId: "admin2",
+    teacherName: "Super Admin",
+    description: "Creating mobile applications for iOS and Android platforms",
+    createdAt: "2023-09-01T11:15:00Z"
+  }
+];
+
+// Project types
+export const PROJECT_TYPES: ProjectType[] = [
+  "Assignment",
+  "Final Project",
+  "Research",
+  "Personal Project",
+  "Other"
+];
+
 export const getMockProjects = (): Project[] => {
   return [...mockProjects];
 };
@@ -186,6 +230,31 @@ export const getMockProjects = (): Project[] => {
 // Function to get mock users
 export const getMockUsers = (): UserProfile[] => {
   return [...mockUsers];
+};
+
+// Function to get teachers only
+export const getMockTeachers = (): UserProfile[] => {
+  return [...mockUsers].filter(user => user.role === "admin");
+};
+
+// Function to get mock classes
+export const getMockClasses = (): ClassInfo[] => {
+  return [...mockClasses];
+};
+
+// Function to get classes by teacher ID
+export const getClassesByTeacher = (teacherId: string): ClassInfo[] => {
+  return [...mockClasses].filter(cls => cls.teacherId === teacherId);
+};
+
+// Function to generate a random class key (6 alphanumeric characters)
+export const generateClassKey = (): string => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
 };
 
 // New function to add a project to the mock data
@@ -201,4 +270,17 @@ export const addMockProject = (project: Omit<Project, "id" | "createdAt">): Proj
   console.log("Updated projects list:", mockProjects);
   
   return newProject;
+};
+
+// Function to add a new class
+export const addMockClass = (classInfo: Omit<ClassInfo, "id" | "createdAt" | "key">): ClassInfo => {
+  const newClass: ClassInfo = {
+    ...classInfo,
+    id: `class${mockClasses.length + 1}`,
+    key: generateClassKey(),
+    createdAt: new Date().toISOString()
+  };
+  
+  mockClasses.push(newClass);
+  return newClass;
 };

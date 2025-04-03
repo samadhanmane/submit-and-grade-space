@@ -29,6 +29,13 @@ export type ProjectCategory =
   | 'IoT'
   | 'Other';
 
+export type ProjectType =
+  | 'Assignment'
+  | 'Final Project'
+  | 'Research'
+  | 'Personal Project'
+  | 'Other';
+
 export interface ProjectGrading {
   codeQuality?: number;
   documentation?: number;
@@ -43,8 +50,12 @@ export interface Project {
   title: string;
   description: string;
   category: ProjectCategory;
+  projectType?: ProjectType;
   submittedBy: string;
   submittedByName?: string;
+  assignedTeacherId?: string;
+  assignedTeacherName?: string;
+  classKey?: string;
   githubLink?: string;
   zipFile?: string;
   status: ProjectStatus;
@@ -67,4 +78,15 @@ export interface AuthContextType extends AuthState {
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateProfile: (profile: Partial<UserProfile>) => Promise<void>;
+}
+
+// Class types
+export interface ClassInfo {
+  id: string;
+  name: string;
+  key: string;
+  teacherId: string;
+  teacherName: string;
+  description?: string;
+  createdAt: string;
 }
