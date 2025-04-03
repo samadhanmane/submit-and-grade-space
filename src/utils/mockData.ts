@@ -137,6 +137,49 @@ export const addMockClass = (newClassInfo: Omit<ClassInfo, 'id' | 'key' | 'creat
   return newClass;
 };
 
+// Find class by key
+export const findClassByKey = (key: string): ClassInfo | undefined => {
+  return mockClasses.find(cls => cls.key === key);
+};
+
+// Join a class using its key
+export const joinClassByKey = (studentId: string, classKey: string): boolean => {
+  const classIndex = mockClasses.findIndex(cls => cls.key === classKey);
+  
+  // If class not found or student already joined
+  if (classIndex === -1) return false;
+  
+  // Initialize students array if it doesn't exist
+  if (!mockClasses[classIndex].students) {
+    mockClasses[classIndex].students = [];
+  }
+  
+  // Check if student already joined
+  if (mockClasses[classIndex].students?.includes(studentId)) {
+    return false;
+  }
+  
+  // Add student to class
+  mockClasses[classIndex].students?.push(studentId);
+  
+  // Update user's enrolled classes
+  const users = getMockUsers();
+  const userIndex = users.findIndex(user => user.id === studentId);
+  
+  if (userIndex !== -1) {
+    if (!users[userIndex].enrolledClasses) {
+      users[userIndex].enrolledClasses = [];
+    }
+    
+    if (!users[userIndex].enrolledClasses?.includes(mockClasses[classIndex].id)) {
+      users[userIndex].enrolledClasses?.push(mockClasses[classIndex].id);
+      localStorage.setItem('mockUsers', JSON.stringify(users));
+    }
+  }
+  
+  return true;
+};
+
 // Mock projects (replace with API calls in a real app)
 let mockProjects: Project[] = [
   {
